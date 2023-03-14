@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# This is a test script for the pbrain-gomoku-ai command.
+
+OK=$'\n\tOK -> the test is passed. :D\n'
+KO=$'\n\tKO -> the test is failed. :(\n'
+target="./pbrain-gomoku-ai"
+
+# function to test the command START
+base_test_start()
+{
+    echo "START 20"
+    echo "END"
+}
+
+zero_test_start()
+{
+    echo "<- fail_test_start ->"
+    echo "START 0"
+    echo "END"
+}
+
+too_much_test_start()
+{
+    echo "<- fail_test_start ->"
+    echo "START 121"
+}
+
+no_arguments_test_start()
+{
+    echo "<- no_arguments_test_start ->"
+    echo "START"
+}
+
+classic_test_board()
+{
+    echo "START 20"
+    echo "BOARD"
+    echo "1,2,1"
+    echo "2,3,2"
+    echo "3,4,1"
+    echo "4,5,2"
+    echo "5,6,1"
+    echo "6,7,2"
+    echo "7,8,1"
+    echo "DONE"
+    echo "END"
+}
+
+test_functions=(
+    base_test_start
+    zero_test_start
+    too_much_test_start
+    no_arguments_test_start
+    classic_test_board
+)
+
+for test_function in "${test_functions[@]}"
+do
+    echo "Running $test_function..."
+    "$test_function" | $target > /dev/null
+    if [ $? -eq 0 ]; then
+        echo "$OK"
+    else
+        echo "$KO"
+    fi
+done

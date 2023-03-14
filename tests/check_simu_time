@@ -1,0 +1,24 @@
+#!/bin/sh
+
+tmpfile=$(mktemp)
+target="./pbrain-gomoku-ai"
+
+base_time_start()
+{
+    echo "START 20"
+    echo "BEGIN"
+    echo "TURN 1,1"
+    echo "END"
+}
+
+exec_base_time_start()
+{
+    echo "<< exec_base_time_start >>"
+    base_time_start | $target > /dev/null
+    if [ $? -eq 0 ]; then
+        echo $OK
+    else
+        echo $KO
+        exit 1
+    fi
+}

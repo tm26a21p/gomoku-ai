@@ -1,0 +1,7 @@
+game/
+log/*
+build/*
+dist/*
+tmp
+zach
+.vscode

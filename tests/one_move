@@ -1,0 +1,28 @@
+#!/bin/sh
+
+target="./pbrain-gomoku-ai"
+
+make
+wait
+
+one_move()
+{
+    echo "START 20"
+    echo "BEGIN"
+    echo "TURN 16,6"
+    echo "END"
+}
+
+exec_one_move()
+{
+    echo "<< exec_one_move >>"
+        one_move | $target > tmp
+    if [ $? -eq 0 ]; then
+        echo $OK
+    else
+        echo $KO
+        exit 1
+    fi
+}
+
+exec_one_move
