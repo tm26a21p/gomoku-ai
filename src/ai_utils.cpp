@@ -227,3 +227,14 @@ void create_children(node_t *node, data_t *data, bool is_player_one)
         node->children.push_back(child);
     }
 }
+
+void free_node(node_t *node)
+{
+    if (node == NULL)
+        return;
+    for (ushort i = 0; i < node->children.size(); i++) {
+        free_node(node->children[i]);
+    }
+}
+
+

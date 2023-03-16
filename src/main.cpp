@@ -30,6 +30,8 @@ void gomoku(void)
 
 int main(UNUSED int ac, UNUSED char **av)
 {
+    // unsigned int n = std::thread::hardware_concurrency();
+    // std::cout << n << " concurrent threads are supported.\n";
     gomoku();
     // monte_carlo_search_tree(NULL);
     return 0;

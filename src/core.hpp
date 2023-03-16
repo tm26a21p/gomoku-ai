@@ -9,6 +9,9 @@
 #include <chrono>
 #include <cstring>
 #include <random>
+#include <thread>
+#include <limits>
+#include <iostream>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -42,6 +45,7 @@ typedef struct data_s {
     char *goban;
     ushort goban_size;
     ushort turn;
+    pos_t my_last_move;
 } data_t;
 
 struct node_s {
@@ -54,3 +58,5 @@ struct node_s {
     pos_t pos;
     std::vector<node_t *> children;
 };
+
+static const double infi = std::numeric_limits<double>::infinity();

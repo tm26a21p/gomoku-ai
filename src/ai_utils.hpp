@@ -11,3 +11,4 @@ std::vector<pos_t> get_all_valid_moves(char *goban, ushort goban_size);
 std::vector<pos_t> get_all_adjacent_moves(data_t *data);
 void shuffle(std::vector<pos_t> &v);
 bool is_game_over(char *goban, ushort goban_size, pos_t pos);
+void free_node(node_t *node);

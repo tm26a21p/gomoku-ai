@@ -32,7 +32,7 @@ no_arguments_test_start()
     echo "START"
 }
 
-classic_test_board()
+classic_test_board_1()
 {
     echo "START 20"
     echo "BOARD"
@@ -47,21 +47,42 @@ classic_test_board()
     echo "END"
 }
 
+classic_test_board_2()
+{
+    echo "START 20"
+    echo "BOARD"
+    echo "10,10,1"
+    echo "11,10,2"
+    echo "10,11,1"
+    echo "12,10,2"
+    echo "DONE"
+    echo "END"
+}
+
 test_functions=(
     base_test_start
     zero_test_start
     too_much_test_start
     no_arguments_test_start
-    classic_test_board
+    classic_test_board_1
+    classic_test_board_2
 )
 
 for test_function in "${test_functions[@]}"
 do
     echo "Running $test_function..."
-    "$test_function" | $target > /dev/null
-    if [ $? -eq 0 ]; then
-        echo "$OK"
+    if [ "$test_function" == "base_test_start" ] || \
+        [ "$test_function" == "classic_test_board" ]; then
+        if "$test_function" | $target > /dev/null; then
+            echo "$OK"
+        else
+            echo "$KO"
+        fi
     else
-        echo "$KO"
+        if "$test_function" | $target > /dev/null; then
+            echo "$KO"
+        else
+            echo "$OK"
+        fi
     fi
 done

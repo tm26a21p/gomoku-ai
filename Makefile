@@ -16,11 +16,11 @@ LOG_DIR	=	log
 
 SRC_DIR	=	src
 
-CFLAGS  = -Wall -Wextra -Werror -std=c++20 -O3 -pthread
+CFLAGS  = -std=c++20 -O3 -pthread
 
-CPPFLAGS  = -Wall -Wextra -Werror -std=c++20 -O3 -pthread
+CPPFLAGS  = -std=c++20 -O3 -pthread
 
-WCPPFLAGS  = -Wall -Wextra -Werror -std=c++20 -O3 -static -static-libgcc -static-libstdc++ -pthread
+WCPPFLAGS  = -std=c++20 -O3 -static -static-libgcc -static-libstdc++ -pthread
 
 SRC_CONTENT = $(shell find $(SRC_DIR) -name "*.cpp")
 
@@ -41,12 +41,10 @@ win:
 
 exec:	win
 	wine $(GAME) -p $(NAME).exe $(GAME_AI) -logpipe $(LOG_DIR)/ -timeturn 5
-	wait
 	./cleaning_wine_processes.sh
 
 exec2:	win
 	wine $(GAME) -p $(GAME_AI) $(NAME).exe -logpipe $(LOG_DIR)/ -timeturn 5
-	wait
 	./cleaning_wine_processes.sh
 
 vs:	win

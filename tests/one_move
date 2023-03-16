@@ -4,12 +4,14 @@ target="./pbrain-gomoku-ai"
 
 make
 wait
+OK="OK"
+KO="KO"
 
 one_move()
 {
     echo "START 20"
     echo "BEGIN"
-    echo "TURN 16,6"
+    echo "TURN 10,10"
     echo "END"
 }
 

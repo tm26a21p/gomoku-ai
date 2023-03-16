@@ -25,6 +25,7 @@ void board(data_t *data)
         ++data->turn;
     }
     play(data, {(ushort)x, (ushort)y});
+    print_goban(data->goban, size);
 }
 
 void start(data_t *data)

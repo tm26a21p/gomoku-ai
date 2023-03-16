@@ -1,4 +1,8 @@
+#include "core.hpp"
+#include "debug.hpp"
 #include "gomoku.hpp"
+#include <future>
+#include <string>
 
 void play(data_t *data, pos_t opponent_last_move)
 {
@@ -11,6 +15,7 @@ void play(data_t *data, pos_t opponent_last_move)
     } else {
         move = monte_carlo_tree_search(data, opponent_last_move);
     }
+    data->my_last_move = move;
     data->goban[move.x * data->goban_size + move.y] = '1';
     ++data->turn;
     std::cout << move.x << "," << move.y << std::endl;
@@ -54,40 +59,29 @@ void backpropagate_recursive(node_t *node, bool win)
     }
 }
 
-node_t *traverse_uct(node_t *node)
-{
-    node_t *best = nullptr;
-    ushort size = node->children.size();
-    if (size == 0) {
-        best = node;
-    } else {
-        best = node->children[0];
+node_t *traverse_uct(node_t *node) {
+    for (node_t *child : node->children) {
+        if (child->nb_visits == 0) {
+            return child;
+        }
     }
-    double best_score = 0;
-    double score = 0;
-    static double c = sqrt(2);
+    double best_score = -1;
+    node_t *best_node = nullptr;
 
-    for (ushort i = 0; i < size; ++i) {
-        if (node->children[i]->nb_visits == 0) {
-            score = 1000000000;
-            best = node->children[i];
-            break;
-        }
-        else {
-            score = (double)node->children[i]->nb_wins / (double)node->children[i]->nb_visits +
-            c * sqrt(log(node->nb_visits) / (double)node->children[i]->nb_visits);
-        }
+    for (node_t *child : node->children) {
+        double score = (double)child->nb_wins / (double)child->nb_visits + sqrt(2 * log(node->nb_visits) / (double)child->nb_visits);
         if (score > best_score) {
             best_score = score;
-            best = node->children[i];
+            best_node = child;
         }
     }
 
-    if (best->children.size() == 0) {
-        create_children(best, best->data, !best->player_one);
-        return best;
+    if (best_node->children.empty()) {
+        create_children(best_node, best_node->data, !best_node->player_one);
+        return best_node->children[0];
     }
-    return traverse_uct(best);
+
+    return traverse_uct(best_node);
 }
 
 node_t *best_child(node_t *node)
@@ -98,7 +92,7 @@ node_t *best_child(node_t *node)
     ushort size = node->children.size();
 
     for (ushort i = 0; i < size; ++i) {
-        score = ((double)node->children[i]->nb_wins / (double)node->children[i]->nb_visits);
+        score = (double)node->children[i]->nb_visits;
         if (score > best_score) {
             best_score = score;
             best_child = node->children[i];
@@ -107,47 +101,45 @@ node_t *best_child(node_t *node)
     return best_child;
 }
 
-void futures_backpropagate(std::vector<std::future<bool>> &futures_sim, node_t *leaf, size_t &nb_simulations)
+void handle_futures(std::future<bool> *futures, node_t *leaf, size_t &nb_simulations)
 {
-    for (size_t i = 0; i < futures_sim.size(); ++i) {
-        if (futures_sim[i].valid()) {
-            if (futures_sim[i].wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-                backpropagate_recursive(leaf, futures_sim[i].get());
-                futures_sim.erase(futures_sim.begin() + i);
+    for (ushort i = 0; i < MAX_THREAD; ++i) {
+        if (futures[i].valid()) {
+            if (futures[i].wait_for(ZERO) == DONE) {
+                backpropagate_recursive(leaf, futures[i].get());
+                futures[i] = std::future<bool>();
                 ++nb_simulations;
             }
         }
     }
 }
 
-
-
-void free_node(node_t *node)
-{
-    if (node == NULL)
-        return;
-    for (ushort i = 0; i < node->children.size(); i++) {
-        free_node(node->children[i]);
-    }
-}
-
 pos_t monte_carlo_tree_search(data_t *data, pos_t last_move)
 {
     node_t *root = create_node(data, NULL, last_move, false);
-    std::chrono::time_point<std::chrono::system_clock> end = \
-    std::chrono::system_clock::now() + std::chrono::seconds(4);
-    std::vector<std::future<bool>> futures_sim;
-    node_t *leaf = nullptr;
-    size_t nb_simulations = 0;
+    create_children(root, data, true);
+    std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now() + FIVE;
+    std::future<bool> futures[MAX_THREAD];
 
+    size_t nb_simulations = 0;
+    node_t *leaf;
+    print_goban(data->goban, data->goban_size);
     while (true) {
         leaf = traverse_uct(root);
-        futures_sim.push_back(std::async(std::launch::async, simulate, leaf));
-        futures_backpropagate(futures_sim, leaf, nb_simulations);
+        for (ushort i = 0; i < MAX_THREAD; ++i) {
+            if (!futures[i].valid())
+                futures[i] = std::async(std::launch::async, simulate, leaf);
+        }
+        handle_futures(futures, leaf, nb_simulations);
         if (std::chrono::system_clock::now() > end)
             break;
     }
-    pos_t res = best_child(root)->pos;
+    pos_t playin = best_child(root)->pos;
     free_node(root);
-    return res;
+    // debug("sim: " + std::to_string(nb_simulations) + " turn " + std::to_string(data->turn) + " nmoves " + std::to_string(root->children.size()));
+    // print_children(root);
+    // for (node_t *child : root->children) {
+    //     print_children(child);
+    // }
+    return playin;
 }

@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# This is a test script for the pbrain-gomoku-ai command.
+
+OK=$'\n\tOK -> the test is passed. :D\n'
+KO=$'\n\tKO -> the test is failed. :(\n'
+target="./pbrain-gomoku-ai"
+
+must_defend_1() {
+    echo "START 20"
+    echo "BOARD"
+    echo "1,0,1"
+    echo "9,9,2"
+    echo "12,12,1"
+    echo "9,8,2"
+    echo "9,10,1"
+    echo "9,7,2"
+    echo "1,10,1"
+    echo "9,6,2"
+    echo "DONE"
+    echo "END"
+}
+
+test_functions=(
+    must_defend_1
+)
+
+for test in "${test_functions[@]}"; do
+    echo "Testing $test"
+    if "$test" | $target; then
+            echo "$KO"
+        else
+            echo "$OK"
+    fi
+done
